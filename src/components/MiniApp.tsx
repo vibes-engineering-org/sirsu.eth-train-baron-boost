@@ -1,93 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import FileUploadCard from "~/components/FileUploadCard";
+import { useFrameSDK } from "~/hooks/useFrameSDK";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "~/components/ui/card";
-import { DaimoPayButton } from "@daimo/pay";
-import { Label } from "~/components/ui/label";
-import { useFrameSDK } from "~/hooks/useFrameSDK";
-import { baseUSDC } from "@daimo/contract";
-import { getAddress } from "viem";
-import BucketExplorer from "./BucketExplorer";
+import { Button } from "~/components/ui/button";
 
-function ExampleCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Welcome to the vibes.engineering template</CardTitle>
-        <CardDescription>
-          This is an example card that you can customize or remove
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Label>Place content in a Card here.</Label>
-      </CardContent>
-    </Card>
-  );
-}
 
-function PaymentComponent() {
-  const [address, setAddress] = useState<`0x${string}`>(
-    "0x32e3C7fD24e175701A35c224f2238d18439C7dBC", // ethereum protocol guild
-  );
-
-  return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>Payment</CardTitle>
-        <CardDescription>Pay $1 using USDC on Base</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="address">Recipient Address</Label>
-          <input
-            id="address"
-            type="text"
-            value={address}
-            onChange={(e) => {
-              if (e.target.value.startsWith("0x")) {
-                return setAddress(e.target.value as `0x${string}`);
-              }
-            }}
-            className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter ETH address or ENS name"
-          />
-        </div>
-        <div className="flex justify-center">
-          <DaimoPayButton
-            appId={process.env.NEXT_PUBLIC_DAIMO_PAY_KEY || "pay-demo"}
-            toChain={baseUSDC.chainId}
-            toUnits="1.00" /* $1.00 USDC */
-            toToken={getAddress(baseUSDC.token)}
-            toAddress={address}
-            onPaymentStarted={(e) => console.log(e)}
-            onPaymentCompleted={(e) => console.log(e)}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function MiniApp() {
-  const { isSDKLoaded } = useFrameSDK();
+  const { isSDKLoaded, isFramePinned, notificationDetails, pinFrame } = useFrameSDK();
 
   if (!isSDKLoaded) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="font-mono text-lg">Loading...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="w-[400px] mx-auto py-2 px-2 space-y-4">
-      <ExampleCard />
-      <PaymentComponent />
-      <FileUploadCard />
-      <BucketExplorer />
+    <div className="w-full max-w-md mx-auto py-8 px-4">
+      <Card className="bg-black text-green-400 font-mono border-green-600 border-2">
+        <CardHeader>
+          <CardTitle className="text-2xl">Railway Royale Waitlist</CardTitle>
+          <CardDescription>
+            Save the mini app to unlock notifications and join the waitlist!
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4">
+          {isFramePinned ? (
+            <p>You&apos;re one step closer to becoming a train baron!</p>
+          ) : (
+            <Button onClick={() => pinFrame()} className="bg-green-600 hover:bg-green-700">
+              Save App
+            </Button>
+          )}
+          {notificationDetails && <p>Notifications enabled! 🎉</p>}
+        </CardContent>
+        <CardFooter>
+          <p className="text-xs">Transport Tycoon vibes.</p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
